@@ -26,6 +26,7 @@ user = {
 }
 
 tasks = [task]
+task_id_counter = 2
 
 
 @app.get("/")
@@ -34,6 +35,9 @@ def read_root():
 
 @app.post("/tasks")
 def create_task(task: dict):
+    global task_id_counter
+    task["task_id"] = task_id_counter
+    task_id_counter += 1
     tasks.append(task)
     return {"message": "Task created successfully", "task": task}
 
@@ -64,3 +68,21 @@ def complete_task(task_id: int):
                 return {"message": "Task is already completed"}
 
     return {"message": "Task not found"}
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int):
+    for task in tasks:
+        if task["task_id"] == task_id:
+            tasks.remove(task)
+            return {"message": "Task deleted successfully"}
+    return {"message": "Task not found"}
+
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, update_task: dict):
+    for task in tasks:
+        if task["task_id"] == task_id:
+            task.update(update_task)
+            return {"message": "Task updated successfully", "task": task}
+    return {"message": "Task not found"}
+
+

@@ -31,8 +31,23 @@
 
                 <button type="submit">Add Task</button>
             </form>
-            
+
             <h2>Tasks</h2>
+            <!-- Filter buttons -->
+             <div class = "filter-buttons">
+                <button onclick = "setFilter('all')">All</button>
+                <button onclick = "setFilter('completed')">Completed</button>
+                <button onclick = "setFilter('incomplete')">Incomplete</button>
+
+            <!-- Sort buttons -->
+             <div class = "sort-buttons">
+                <button onclick = "setSort('reward')">Sort by Reward</button>
+                <button onclick = "setSort('difficulty')">Sort by Difficulty</button>
+             </div>
+
+            <!-- Search -->
+            <input type = "text" id = "search" placeholder = "Search tasks...">
+
             <ul id="task-list"></ul>
         </div>
     </div>
