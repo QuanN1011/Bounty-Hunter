@@ -15,6 +15,23 @@
         </div>
 
         <div class="tasks-box">
+            <h2>Create Task</h2>
+
+            <form id="create-task-form">
+                <input type="text" id="name" placeholder="Task Name" required />
+                <input type="text" id="description" placeholder="Description" required />
+                
+                <select id="difficulty">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+
+                <input type="number" id="reward" placeholder="Reward" required />
+
+                <button type="submit">Add Task</button>
+            </form>
+            
             <h2>Tasks</h2>
             <ul id="task-list"></ul>
         </div>

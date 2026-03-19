@@ -15,6 +15,9 @@ body {
 h1 {
     margin-bottom: 30px;
 }
+h2 {
+    margin-top: 0;
+}
 
 .bounty-box {
     background-color: #1e293b;
@@ -24,7 +27,8 @@ h1 {
 }
 
 #bounty {
-    font-size: 2em;
+    font-size: 2.5em;
+    font-weight: bold;
     color: #facc15;
 }
 
@@ -32,6 +36,12 @@ h1 {
     background-color: #1e293b;
     padding: 20px;
     border-radius: 10px;
+    margin-top: 20px;
+}
+
+.bounty-box,
+.tasks-box {
+    border: 1px solid #334155;
 }
 
 ul {
@@ -41,7 +51,68 @@ ul {
 
 li {
     background-color: #334155;
-    margin: 10px 0;
+    margin: 12px 0;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+li button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #3b82f6;
+    color: white;
+    cursor: pointer;
+}
+
+li button:hover {
+    background-color: #2563eb;
+}
+
+li button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+form input,
+form select {
+    flex: 1 1 45%;
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 6px;
+    border: none;
+    background-color: #475569;
+    color: white;
+}
+
+form input::placeholder {
+    color: #cbd5f5;
+}
+
+form button {
+    flex: 1 1 100%;
+    padding: 12px;
+    background-color: #22c55e;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #16a34a;
 }

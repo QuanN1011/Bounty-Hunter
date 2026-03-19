@@ -39,7 +39,7 @@ def create_task(task: dict):
 
 @app.get("/tasks")
 def get_tasks():
-    return {"tasks": tasks}
+    return tasks
 
 @app.get("/tasks/{task_id}")
 def get_task_by_id(task_id: int):
@@ -62,3 +62,5 @@ def complete_task(task_id: int):
                 return {"message": "Task completed successfully", "task": task}
             else:
                 return {"message": "Task is already completed"}
+
+    return {"message": "Task not found"}
