@@ -73,20 +73,44 @@ def get_user():
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM users WHERE user_id = 1")
-    row = cursor.fetchone()
-    if row is None:
+    user = cursor.fetchone()
+    if user is None:
         conn.close()
         return {"Message": "User not found"} # prevent crash
     
-    user = dict(row)
-    
+    level = get_level(user["total_bounty"])
+    progress = get_progress(user["total_bounty"])
     conn.close()
-    return user
+    
+    return {
+        "username": user["username"],
+        "bounty": user["bounty"],
+        "total_bounty": user["total_bounty"],
+        "total_level": level,
+        "progress": progress
+    }
 
 @app.post("/tasks/{task_id}/complete")
 def complete_task(task_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # get reward
+    cursor.execute("SELECT reward, difficulty, complete FROM tasks WHERE task_id = ?", (task_id,))
+    row = cursor.fetchone()
+
+    if row is None:
+        conn.close()
+        return {"Message": "Task not found"}
+
+    if row["complete"]:
+        conn.close()
+        return {"Message": "Task already completed"}
+
+    base_reward = row["reward"]
+    difficulty = row["difficulty"]
+
+    reward = calculate_rewards(base_reward, difficulty)
 
     # mark task complete
     cursor.execute("""
@@ -95,17 +119,13 @@ def complete_task(task_id: int):
         WHERE task_id = ?
     """, (task_id,))
 
-    # get reward
-    cursor.execute("SELECT reward FROM tasks WHERE task_id = ?", (task_id,))
-    row = cursor.fetchone()
-    reward = row["reward"] if row else 0
-
-    # update user bounty
+    # update user bounty and total bounty
     cursor.execute("""
         UPDATE users
-        SET bounty = bounty + ?
+        SET bounty = bounty + ?,
+            total_bounty = total_bounty + ?
         WHERE user_id = 1
-    """, (reward,))
+    """, (reward, reward))
 
     conn.commit()
     conn.close()
@@ -160,6 +180,53 @@ def update_task(task_id: int, update_task: dict):
         "message": "Task updated successfully",
         "task": updated_task
     }
+
+# get level
+def get_level(total_bounty):
+    if total_bounty >= 10000:
+        return "Emperor"
+
+    elif total_bounty >= 4000:
+        return "Warlord"
+
+    elif total_bounty >= 1500:
+        return "Worst Generation"
+
+    elif total_bounty >= 500:
+        return "Pirate"
+
+    else:
+        return "Rookie"
+    
+# get progress for progress bar
+def get_progress(total_bounty):
+
+    levels = [0, 500, 1500, 4000, 10000]
+
+    for i in range(len(levels) - 1):
+
+        if total_bounty < levels[i+1]:
+
+            current = levels[i]
+            next_level = levels[i+1]
+
+            progress = (total_bounty - current) / (next_level - current)
+
+            return int(progress * 100)
+
+    return 100
+
+# function to reward harder tasks
+
+def calculate_rewards(base_reward, difficulty):
+    if difficulty == "Hard":
+        return int(base_reward * 2)
+    elif difficulty == "Medium":
+        return int(base_reward * 1.5)
+    else:
+        return base_reward
+    
+
 
 init_db()
 

@@ -1,8 +1,12 @@
 
 const source = "http://127.0.0.1:8000";
 const bountyForm = document.getElementById("bounty"); // Display user's bounty, loadUser
+const totalBounty = document.getElementById("total-bounty");
 const taskList = document.getElementById("task-list"); // Container for task cards, loadTasks
 const form = document.getElementById("create-task-form"); // Form for creating new tasks, handleCreateTask  
+const level = document.getElementById("level"); // get level
+const progress = document.getElementById("progress-fill"); // get porgress fill
+const progressText = document.getElementById("progress-text"); // get progress text
 
 let currentFilter = "all"; // Track current filter state
 let currentSort = "none"; // Track current sort state
@@ -17,6 +21,11 @@ function loadUser(){
         .then(user => {
             console.log("User: ", user);
             bountyForm.textContent = "Bounty: " + user.bounty;
+            totalBounty.textContent = "Total Bounty: " + user.total_bounty;
+            level.textContent = "Rank: " + user.total_level;
+            progress.style.width = user.progress + "%";
+            progressText.textContent = user.progress + "%";
+
         });
 }
 
@@ -252,7 +261,6 @@ function setSearch(){
         loadTasks(); // Refresh tasks based on new search query
     });
 }
-
 
 
 // run 

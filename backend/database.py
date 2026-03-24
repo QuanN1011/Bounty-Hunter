@@ -19,7 +19,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
-            bounty INTEGER DEFAULT 0
+            bounty INTEGER DEFAULT 0,
+            total_bounty INTEGER DEFAULT 0
         )
     ''')
 
