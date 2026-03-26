@@ -1,5 +1,12 @@
+import {
+    getUser,
+    getTasks,
+    createTask,
+    completeTaskAPI,
+    deleteTaskAPI,
+    updateTaskAPI
+} from "./api.js";
 
-const source = "http://127.0.0.1:8000";
 const bountyForm = document.getElementById("bounty"); // Display user's bounty, loadUser
 const totalBounty = document.getElementById("total-bounty");
 const taskList = document.getElementById("task-list"); // Container for task cards, loadTasks
@@ -15,44 +22,40 @@ let searchQuery = ""; // Track current search query (if implementing search)
 
 
 // get user info and update bounty display
-function loadUser(){
-    fetch(source + "/user")
-        .then(response => response.json())
-        .then(user => {
-            console.log("User: ", user);
-            bountyForm.textContent = "Bounty: " + user.bounty;
-            totalBounty.textContent = "Total Bounty: " + user.total_bounty;
-            level.textContent = "Rank: " + user.total_level;
-            progress.style.width = user.progress + "%";
-            progressText.textContent = user.progress + "%";
+async function loadUser() {
 
-        });
+    const user = await getUser();
+
+    if (!user) return;
+
+    bountyForm.textContent = "Bounty: " + user.bounty;
+    totalBounty.textContent = "Total Bounty: " + user.total_bounty;
+    level.textContent = "Rank: " + user.total_level;
+
+    progress.style.width = user.progress + "%";
+    progressText.textContent = user.progress + "%";
 }
 
 // get tasks and display them
-function loadTasks(){
-    taskList.innerHTML = ""; // Clear existing tasks
+async function loadTasks(){
 
-    fetch(source + "/tasks")
-        .then(response => response.json())
-        .then(data => {
+    taskList.innerHTML = "<p>Loading tasks...</p>";
 
-            // filter tasks based on current filter state
-            let filteredTasks = data;
-            filteredTasks = applyFilter(filteredTasks);
+    const data = await getTasks();
 
-            // filter tasks based on search query
-            filteredTasks = applySearch(filteredTasks);
+    taskList.innerHTML = "";
 
-            // sort tasks based on current sort state
-            filteredTasks = applySort(filteredTasks);
+    if (!data) return;
 
-            for (const task of filteredTasks) {
-                const taskItem = createTaskCard(task);
-                taskList.appendChild(taskItem);
+    let filteredTasks = data;
+    filteredTasks = applyFilter(filteredTasks);
+    filteredTasks = applySearch(filteredTasks);
+    filteredTasks = applySort(filteredTasks);
 
-            }   
-        });
+    for (const task of filteredTasks) {
+        const taskItem = createTaskCard(task);
+        taskList.appendChild(taskItem);
+    }
 }
 
 // Create a task card element for display
@@ -108,28 +111,24 @@ function createTaskCard(task){
 }
 
 // Send request to complete a task and update user bounty and task list
-function completeTask(taskId){
-    fetch(`${source}/tasks/${taskId}/complete`, {
-        method: "POST",
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Task completion response: ", data);
-        loadUser(); // Update bounty display after completing task
-        loadTasks(); // Refresh task list to show updated status
-    })
+async function completeTask(taskId){
+
+    const data = await completeTaskAPI(taskId);
+
+    console.log("Task completion response:", data);
+
+    await loadUser();
+    await loadTasks();
 }
 
 // delete tasks
-function deleteTask(taskId){
-    fetch(`${source}/tasks/${taskId}`, {
-        method: "DELETE",
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Delete task response: ", data);
-        loadTasks(); // Refresh the task list to show the updated status
-    });
+async function deleteTask(taskId){
+
+    const data = await deleteTaskAPI(taskId);
+
+    console.log("Delete task response:", data);
+
+    loadTasks();
 }
 
 // update tasks
@@ -145,7 +144,7 @@ function updateTask(task, taskItem){
     <button id="save-button-${task.task_id}">Save</button>
     `;
 
-    document.getElementById(`save-button-${task.task_id}`).onclick = function(){
+    document.getElementById(`save-button-${task.task_id}`).onclick = async function(){
         const newName = document.getElementById(`edit-name-${task.task_id}`).value;
         const newDescription = document.getElementById(`edit-description-${task.task_id}`).value;
         const newDifficulty = document.getElementById(`edit-difficulty-${task.task_id}`).value;
@@ -163,52 +162,38 @@ function updateTask(task, taskItem){
             reward: newReward
         };
 
-        fetch(`${source}/tasks/${task.task_id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedTask)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Update task response: ", data);
-            loadTasks(); // Refresh the task list to show the updated task
-        });
+        const data = await updateTaskAPI(task.task_id, updatedTask);
+        console.log("Update task response:", data);
+        loadTasks();
     };
 
 }
 
 // Handle form submission to create a new task
 form.addEventListener("submit", handleCreateTask);
-function handleCreateTask(event){
+async function handleCreateTask(event){
+
     event.preventDefault();
+
     const name = document.getElementById("name").value;
     const description = document.getElementById("description").value;
     const difficulty = document.getElementById("difficulty").value;
     const reward = parseInt(document.getElementById("reward").value);
 
     const newTask = {
-        name: name,
-        description: description,
-        difficulty: difficulty,
-        reward: reward,
+        name,
+        description,
+        difficulty,
+        reward,
         complete: false
     };
 
-    console.log("Creating task: ", newTask);
+    const data = await createTask(newTask);
 
-    fetch(`${source}/tasks`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(newTask)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Create task response: ", data);
-        form.reset(); // Clear the form
-        loadTasks(); // Refresh the task list to show the new task
-    });
+    console.log("Create task response:", data);
+
+    form.reset();
+    loadTasks();
 }
 
 function setFilter(filter) {
