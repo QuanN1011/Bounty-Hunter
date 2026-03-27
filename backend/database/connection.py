@@ -26,7 +26,9 @@ def init_db():
             description TEXT,
             difficulty TEXT,
             reward INTEGER,
-            complete BOOLEAN DEFAULT 0
+            complete BOOLEAN DEFAULT 0,
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
         )
     """)
 

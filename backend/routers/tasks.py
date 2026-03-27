@@ -1,12 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from database.connection import get_db_connection
 from services.reward_service import calculate_rewards
+from fastapi import Depends
+from services.auth_service import get_current_user
 
 router = APIRouter()
 
 
 @router.post("/tasks")
-def create_task(task: dict):
+def create_task(task: dict, user_id: int = Depends(get_current_user)):
     required_fields = ["name", "description", "difficulty", "reward"]
 
     for field in required_fields:
@@ -20,14 +22,15 @@ def create_task(task: dict):
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO tasks (name, description, difficulty, reward, complete)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO tasks (name, description, difficulty, reward, complete, user_id)
+        VALUES (?, ?, ?, ?, ?, ?)
     """, (
         task["name"],
         task["description"],
         task["difficulty"],
         task["reward"],
-        False
+        False,
+        user_id
     ))
 
     conn.commit()
@@ -37,11 +40,15 @@ def create_task(task: dict):
 
 
 @router.get("/tasks")
-def get_tasks():
+def get_tasks(user_id: int = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM tasks")
+    cursor.execute(
+    "SELECT * FROM tasks WHERE user_id = ?",
+    (user_id,)
+    )
+
     rows = cursor.fetchall()
     conn.close()
 
@@ -49,11 +56,13 @@ def get_tasks():
 
 
 @router.get("/tasks/{task_id}")
-def get_task_by_id(task_id: int):
+def get_task_by_id(task_id: int, user_id: int = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM tasks WHERE task_id = ?", (task_id,))
+    cursor.execute("SELECT * FROM tasks WHERE task_id = ? AND user_id = ?", 
+                   (task_id, user_id)
+    )
     row = cursor.fetchone()
     conn.close()
 
@@ -64,7 +73,7 @@ def get_task_by_id(task_id: int):
 
 
 @router.put("/tasks/{task_id}")
-def update_task(task_id: int, updated_task: dict):
+def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_current_user)):
     required_fields = ["name", "description", "difficulty", "reward"]
 
     for field in required_fields:
@@ -77,7 +86,10 @@ def update_task(task_id: int, updated_task: dict):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM tasks WHERE task_id = ?", (task_id,))
+    cursor.execute("SELECT * FROM tasks WHERE task_id = ? AND user_id = ?", 
+                   (task_id, user_id)
+    )
+
     existing_task = cursor.fetchone()
 
     if existing_task is None:
@@ -87,13 +99,14 @@ def update_task(task_id: int, updated_task: dict):
     cursor.execute("""
         UPDATE tasks
         SET name = ?, description = ?, difficulty = ?, reward = ?
-        WHERE task_id = ?
+        WHERE task_id = ? AND user_id = ?
     """, (
         updated_task["name"],
         updated_task["description"],
         updated_task["difficulty"],
         updated_task["reward"],
-        task_id
+        task_id,
+        user_id
     ))
 
     conn.commit()
@@ -109,18 +122,22 @@ def update_task(task_id: int, updated_task: dict):
 
 
 @router.delete("/tasks/{task_id}")
-def delete_task(task_id: int):
+def delete_task(task_id: int, user_id: int = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM tasks WHERE task_id = ?", (task_id,))
+    cursor.execute("SELECT * FROM tasks WHERE task_id = ? AND user_id = ?", 
+                   (task_id, user_id)
+    )
     task = cursor.fetchone()
 
     if task is None:
         conn.close()
         raise HTTPException(status_code=404, detail="Task not found")
 
-    cursor.execute("DELETE FROM tasks WHERE task_id = ?", (task_id,))
+    cursor.execute("DELETE FROM tasks WHERE task_id = ? AND user_id = ?", 
+                   (task_id, user_id)
+    )
     conn.commit()
     conn.close()
 
@@ -128,13 +145,13 @@ def delete_task(task_id: int):
 
 
 @router.post("/tasks/{task_id}/complete")
-def complete_task(task_id: int):
+def complete_task(task_id: int, user_id: int = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT reward, difficulty, complete FROM tasks WHERE task_id = ?",
-        (task_id,)
+        "SELECT reward, difficulty, complete FROM tasks WHERE task_id = ? AND user_id = ?",
+        (task_id, user_id)
     )
     row = cursor.fetchone()
 
@@ -160,8 +177,8 @@ def complete_task(task_id: int):
         UPDATE users
         SET bounty = bounty + ?,
             total_bounty = total_bounty + ?
-        WHERE user_id = 1
-    """, (reward, reward))
+        WHERE user_id = ?
+    """, (reward, reward, user_id))
 
     conn.commit()
     conn.close()

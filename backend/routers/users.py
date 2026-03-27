@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException
 from database.connection import get_db_connection
 from services.reward_service import get_level, get_progress
 from services.auth_service import hash_password, verify_password, create_access_token
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import Depends
 
 router = APIRouter()
 
@@ -58,12 +60,9 @@ def register_user(user: dict):
     return {"message": "User registered successfully"}
 
 @router.post("/login")
-def login_user(user: dict):
-    username = user.get("username")
-    password = user.get("password")
-
-    if not username or not password:
-        raise HTTPException(status_code=400, detail="Username and password are required")
+def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
+    username = form_data.username
+    password = form_data.password
 
     conn = get_db_connection()
     cursor = conn.cursor()
