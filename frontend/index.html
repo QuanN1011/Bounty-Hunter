@@ -5,6 +5,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    
+    <div class="login-box">
+        <h2>Login</h2>
+
+        <input id="username" placeholder="Username">
+        <input id="password" type="password" placeholder="Password">
+
+        <button type="button" id="login-btn">Login</button>
+    </div>
+    <button type="button" id="logout-btn">Logout</button>
 
     <div class="container">
         <h1>🏴‍☠️ Bounty Hunter</h1>
@@ -46,15 +56,16 @@
 
             <h2>Tasks</h2>
             <!-- Filter buttons -->
-             <div class = "filter-buttons">
-                <button onclick = "setFilter('all')">All</button>
-                <button onclick = "setFilter('completed')">Completed</button>
-                <button onclick = "setFilter('incomplete')">Incomplete</button>
+             <div class="filter-buttons">
+                <button type="button" data-filter="all">All</button>
+                <button type="button" data-filter="completed">Completed</button>
+                <button type="button" data-filter="incomplete">Incomplete</button>
+            </div>
 
             <!-- Sort buttons -->
-             <div class = "sort-buttons">
-                <button onclick = "setSort('reward')">Sort by Reward</button>
-                <button onclick = "setSort('difficulty')">Sort by Difficulty</button>
+             <div class="sort-buttons">
+                <button type="button" data-sort="reward">Sort by Reward</button>
+                <button type="button" data-sort="difficulty">Sort by Difficulty</button>
              </div>
 
             <!-- Search -->

@@ -4,7 +4,8 @@ import {
     createTask,
     completeTaskAPI,
     deleteTaskAPI,
-    updateTaskAPI
+    updateTaskAPI,
+    loginUser
 } from "./api.js";
 
 const bountyForm = document.getElementById("bounty"); // Display user's bounty, loadUser
@@ -20,6 +21,33 @@ let currentSort = "none"; // Track current sort state
 let searchQuery = ""; // Track current search query (if implementing search)
 
 
+// function to login 
+async function login() {
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const data = await loginUser(username, password);
+
+    if (!data.access_token) {
+        alert("Login failed");
+        return;
+    }
+
+    localStorage.setItem("token", data.access_token);
+
+    console.log("User logged in");
+
+    loadApp();
+}
+
+// function to log out
+function logout() {
+
+    localStorage.removeItem("token");
+
+    location.reload();
+}
 
 // get user info and update bounty display
 async function loadUser() {
@@ -30,7 +58,7 @@ async function loadUser() {
 
     bountyForm.textContent = "Bounty: " + user.bounty;
     totalBounty.textContent = "Total Bounty: " + user.total_bounty;
-    level.textContent = "Rank: " + user.total_level;
+    level.textContent = "Rank: " + user.level;
 
     progress.style.width = user.progress + "%";
     progressText.textContent = user.progress + "%";
@@ -239,23 +267,43 @@ function applySort(tasks){
     return tasks; // No sort, return tasks in original order
 }
 
-// search function
-function setSearch(){
-    document.getElementById("search").addEventListener("input", function(event){
+let searchListenerBound = false;
+
+function setSearch() {
+    if (searchListenerBound) return;
+    searchListenerBound = true;
+    document.getElementById("search").addEventListener("input", function (event) {
         searchQuery = event.target.value.toLowerCase();
-        loadTasks(); // Refresh tasks based on new search query
+        loadTasks();
     });
 }
 
+function bindModuleControls() {
+    document.getElementById("login-btn").addEventListener("click", login);
+    document.getElementById("logout-btn").addEventListener("click", logout);
 
-// run 
+    document.querySelector(".filter-buttons")?.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-filter]");
+        if (btn) setFilter(btn.dataset.filter);
+    });
+    document.querySelector(".sort-buttons")?.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-sort]");
+        if (btn) setSort(btn.dataset.sort);
+    });
+}
 
-function init(){
-    loadUser();
-    loadTasks();
+async function loadApp() {
+    await loadUser();
+    await loadTasks();
     setSearch();
 }
 
-init();
+bindModuleControls();
 
-    
+const token = localStorage.getItem("token");
+if (token) {
+    loadApp();
+} else {
+    console.log("User not logged in");
+}
+

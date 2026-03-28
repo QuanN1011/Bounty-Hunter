@@ -4,17 +4,19 @@ from services.reward_service import get_level, get_progress
 from services.auth_service import hash_password, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Depends
+from services.auth_service import get_current_user
 
 router = APIRouter()
 
 
-@router.get("/user")
-def get_user():
+@router.get("/user/me")
+def get_current_user_info(user_id: int = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE user_id = 1")
+    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
     user = cursor.fetchone()
+
     conn.close()
 
     if user is None:
@@ -24,10 +26,11 @@ def get_user():
     progress = get_progress(user["total_bounty"])
 
     return {
+        "user_id": user["user_id"],
         "username": user["username"],
         "bounty": user["bounty"],
         "total_bounty": user["total_bounty"],
-        "total_level": level,
+        "level": level,
         "progress": progress
     }
 
@@ -77,7 +80,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     if not verify_password(password, db_user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    access_token = create_access_token({"user_id": db_user["user_id"]})
+    access_token = create_access_token({"sub": str(db_user["user_id"])})
 
     return {
         "access_token": access_token,
@@ -107,3 +110,5 @@ def get_user_by_id(user_id: int):
         "total_level": level,
         "progress": progress
     }
+
+

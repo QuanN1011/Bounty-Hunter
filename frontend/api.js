@@ -1,13 +1,31 @@
 const source = "http://127.0.0.1:8000";
 
-// get user
+function getAuthHeaders() {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        return {};
+    }
+
+    return {
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+// get authenticated user (matches GET /user/me)
 export async function getUser() {
     try {
-        const response = await fetch(`${source}/user`);
+        const response = await fetch(`${source}/user/me`, {
+            headers: getAuthHeaders()
+        });
+
         if (!response.ok) {
             throw new Error("Failed to fetch user");
         }
+
         return await response.json();
+
     } catch (error) {
         console.error("Error loading user:", error);
         return null;
@@ -17,11 +35,16 @@ export async function getUser() {
 // get tasks
 export async function getTasks() {
     try {
-        const response = await fetch(`${source}/tasks`);
+        const response = await fetch(`${source}/tasks`, {
+            headers: getAuthHeaders()
+        });
+
         if (!response.ok) {
             throw new Error("Failed to fetch tasks");
         }
+
         return await response.json();
+
     } catch (error) {
         console.error("Error loading tasks:", error);
         return [];
@@ -34,7 +57,8 @@ export async function createTask(task) {
         const response = await fetch(`${source}/tasks`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                ...getAuthHeaders()
             },
             body: JSON.stringify(task)
         });
@@ -44,6 +68,7 @@ export async function createTask(task) {
         }
 
         return await response.json();
+
     } catch (error) {
         console.error("Error creating task:", error);
     }
@@ -53,7 +78,8 @@ export async function createTask(task) {
 export async function completeTaskAPI(taskId) {
     try {
         const response = await fetch(`${source}/tasks/${taskId}/complete`, {
-            method: "POST"
+            method: "POST",
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
@@ -61,6 +87,7 @@ export async function completeTaskAPI(taskId) {
         }
 
         return await response.json();
+
     } catch (error) {
         console.error("Error completing task:", error);
     }
@@ -70,7 +97,8 @@ export async function completeTaskAPI(taskId) {
 export async function deleteTaskAPI(taskId) {
     try {
         const response = await fetch(`${source}/tasks/${taskId}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
@@ -78,6 +106,7 @@ export async function deleteTaskAPI(taskId) {
         }
 
         return await response.json();
+
     } catch (error) {
         console.error("Error deleting task:", error);
     }
@@ -89,7 +118,8 @@ export async function updateTaskAPI(taskId, updatedTask) {
         const response = await fetch(`${source}/tasks/${taskId}`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                ...getAuthHeaders()
             },
             body: JSON.stringify(updatedTask)
         });
@@ -99,7 +129,33 @@ export async function updateTaskAPI(taskId, updatedTask) {
         }
 
         return await response.json();
+
     } catch (error) {
         console.error("Error updating task:", error);
+    }
+}
+
+// login user
+export async function loginUser(username, password) {
+    try {
+        const response = await fetch(`${source}/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                username: username,
+                password: password
+            })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            return { ...data, access_token: undefined };
+        }
+        return data;
+    } catch (error) {
+        console.error("Login error:", error);
+        return {};
     }
 }
