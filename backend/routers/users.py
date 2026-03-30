@@ -36,11 +36,14 @@ def get_current_user_info(user_id: int = Depends(get_current_user)):
 
 @router.post("/register")
 def register_user(user: dict):
-    username = user.get("username")
+    username = user.get(("username") or "").strip()
     password = user.get("password")
 
     if not username or not password:
         raise HTTPException(status_code=400, detail="Username and password are required")
+
+    if " " in username:
+        raise HTTPException(status_code=400, detail="Username cannot contain spaces")
 
     hashed_password = hash_password(password)
 
@@ -64,8 +67,11 @@ def register_user(user: dict):
 
 @router.post("/login")
 def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
-    username = form_data.username
+    username = (form_data.username or " ").strip()
     password = form_data.password
+
+    if " " in username:
+        raise HTTPException(status_code=400, detail="Invalid username or password")
 
     conn = get_db_connection()
     cursor = conn.cursor()

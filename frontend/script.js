@@ -27,8 +27,13 @@ let searchQuery = ""; // Track current search query (if implementing search)
 // function to login 
 async function login() {
 
-    const username = document.getElementById("username").value;
+    const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
+
+    if (username.includes(" ")) {
+        alert("Username cannot contain spaces.");
+        return;
+    }
 
     const data = await loginUser(username, password);
 
@@ -47,8 +52,13 @@ async function login() {
 
 // function to register
 async function register() {
-  const username = document.getElementById("register-username").value;
+  const username = document.getElementById("register-username").value.trim();
   const password = document.getElementById("register-password").value;
+
+  if (username.includes(" ")){
+    alert("Username cannot contain spaces");
+    return;
+  }
 
   const result = await registerUser(username, password);
 
