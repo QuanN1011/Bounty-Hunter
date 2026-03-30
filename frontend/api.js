@@ -135,6 +135,30 @@ export async function updateTaskAPI(taskId, updatedTask) {
     }
 }
 
+// register user
+export async function registerUser(username, password) {
+    try {
+        const response = await fetch(`${source}/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            return { ok: false, data };
+        }
+        return { ok: true, data };
+    } catch (error) {
+        console.error("Registration error:", error);
+        return { ok: false, data: {} };
+    }
+}
+
 // login user
 export async function loginUser(username, password) {
     try {
