@@ -5,9 +5,11 @@ import {
     completeTaskAPI,
     deleteTaskAPI,
     updateTaskAPI,
+    registerUser,
     loginUser
 } from "./api.js";
 
+/* ========= DOM references (dashboard elements) ========= */
 const bountyForm = document.getElementById("bounty"); // Display user's bounty, loadUser
 const totalBounty = document.getElementById("total-bounty");
 const taskList = document.getElementById("task-list"); // Container for task cards, loadTasks
@@ -16,11 +18,12 @@ const level = document.getElementById("level"); // get level
 const progress = document.getElementById("progress-fill"); // get porgress fill
 const progressText = document.getElementById("progress-text"); // get progress text
 
+/* ========= UI state ========= */
 let currentFilter = "all"; // Track current filter state
 let currentSort = "none"; // Track current sort state
 let searchQuery = ""; // Track current search query (if implementing search)
 
-
+/* ========= Auth actions ========= */
 // function to login 
 async function login() {
 
@@ -35,10 +38,27 @@ async function login() {
     }
 
     localStorage.setItem("token", data.access_token);
+    window.location.href = "index.html";
 
     console.log("User logged in");
 
     loadApp();
+}
+
+// function to register
+async function register() {
+  const username = document.getElementById("register-username").value;
+  const password = document.getElementById("register-password").value;
+
+  const result = await registerUser(username, password);
+
+  if (!result.ok) {
+    alert("Registration failed: " + (result.data?.detail || "Unknown error"));
+    return;
+  }
+
+  alert("Registration successful. Please log in.");
+  window.location.href = "login.html";
 }
 
 // function to log out
@@ -49,8 +69,10 @@ function logout() {
     location.reload();
 }
 
+/* ========= Dashboard: user + tasks rendering ========= */
 // get user info and update bounty display
 async function loadUser() {
+    if (!bountyForm || !totalBounty || !level || !progress || !progressText) return;
 
     const user = await getUser();
 
@@ -59,6 +81,11 @@ async function loadUser() {
     bountyForm.textContent = "Bounty: " + user.bounty;
     totalBounty.textContent = "Total Bounty: " + user.total_bounty;
     level.textContent = "Rank: " + user.level;
+
+    const navUsername = document.getElementById("nav-username");
+    if (navUsername){
+        navUsername.textContent = user.username;
+    }
 
     progress.style.width = user.progress + "%";
     progressText.textContent = user.progress + "%";
@@ -86,6 +113,7 @@ async function loadTasks(){
     }
 }
 
+/* ========= Dashboard: task UI + mutations ========= */
 // Create a task card element for display
 function createTaskCard(task){
     const taskItem = document.createElement("li");
@@ -197,8 +225,11 @@ function updateTask(task, taskItem){
 
 }
 
+/* ========= Dashboard: create task ========= */
 // Handle form submission to create a new task
-form.addEventListener("submit", handleCreateTask);
+if (form) {
+    form.addEventListener("submit", handleCreateTask);
+}
 async function handleCreateTask(event){
 
     event.preventDefault();
@@ -224,6 +255,7 @@ async function handleCreateTask(event){
     loadTasks();
 }
 
+/* ========= Dashboard: filtering / sorting / searching ========= */
 function setFilter(filter) {
     currentFilter = filter;
     loadTasks(); // Refresh tasks based on new filter
@@ -278,9 +310,17 @@ function setSearch() {
     });
 }
 
+/* ========= Dashboard: event wiring ========= */
 function bindModuleControls() {
-    document.getElementById("login-btn").addEventListener("click", login);
-    document.getElementById("logout-btn").addEventListener("click", logout);
+    document.getElementById("login-form")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        login();
+    });
+    document.getElementById("register-form")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        register();
+    });
+    document.getElementById("logout-btn")?.addEventListener("click", logout);
 
     document.querySelector(".filter-buttons")?.addEventListener("click", (e) => {
         const btn = e.target.closest("button[data-filter]");
@@ -292,6 +332,13 @@ function bindModuleControls() {
     });
 }
 
+/* ========= Startup ========= */
+function updateAuthUI(){
+    const logoutButton = document.getElementById("logout-btn");
+    if (!logoutButton) return;
+    logoutButton.hidden = !localStorage.getItem("token");
+}
+
 async function loadApp() {
     await loadUser();
     await loadTasks();
@@ -299,11 +346,31 @@ async function loadApp() {
 }
 
 bindModuleControls();
+updateAuthUI();
 
+// on register, when click enter on username, go to password input
+document.getElementById("register-username")?.addEventListener("keydown", function (e){
+    if (e.key == "Enter"){
+        e.preventDefault();
+        document.getElementById("register-password").focus();
+    }
+});
+
+// on login, when click enter on username, go to password input
+document.getElementById("username")?.addEventListener("keydown", function (e){
+    if (e.key == "Enter"){
+        e.preventDefault();
+        document.getElementById("password").focus();
+    }
+});
+
+const isDashboardPage = Boolean(
+  document.getElementById("bounty") &&
+  document.getElementById("task-list") &&
+  document.getElementById("create-task-form")
+);
 const token = localStorage.getItem("token");
-if (token) {
-    loadApp();
-} else {
-    console.log("User not logged in");
+if (token && isDashboardPage) {
+  loadApp();
 }
 

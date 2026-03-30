@@ -1,11 +1,3 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #0f172a;
-    color: white;
-    margin: 0;
-    padding: 0;
-}
-
 .container {
     width: 600px;
     margin: 50px auto;
@@ -143,4 +135,253 @@ form button:hover {
     background: linear-gradient(90deg, #facc15, #fde047);
     border-radius: 10px;
     transition: width 0.4s ease;
+}
+
+/* =========================
+   Pirate UI improvements, Navbar, and Auth Pages
+   ========================= */
+:root {
+    --sea-deep: #071225;
+    --sea-mid: #0c2140;
+    --ink: #f3e8c6;
+    --ink-dim: rgba(243, 232, 198, 0.75);
+    --gold: #facc15;
+    --gold-bright: #fde047;
+    --crimson: #c41e3a;
+    --crimson-dark: #8f182a;
+    --slate: #334155;
+    --rope: #8b6914;
+}
+
+body {
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    background: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(30, 58, 95, 0.55), transparent),
+        linear-gradient(180deg, var(--sea-deep) 0%, #050b17 100%);
+    color: var(--ink);
+}
+
+/* Navbar */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 14px 28px;
+    background: linear-gradient(180deg, rgba(5, 18, 37, 0.96), rgba(7, 18, 37, 0.94));
+    border-bottom: 3px solid var(--gold);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.35);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.nav-left a {
+    margin-right: 0; /* override older rule */
+    text-decoration: none;
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-left a:hover {
+    color: var(--gold-bright);
+    border-color: rgba(250, 204, 21, 0.6);
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.12);
+    transform: translateY(-1px);
+}
+
+.nav-center {
+    text-align: center;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--gold-bright);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.nav-right {
+    justify-self: auto; /* override older grid rule */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-right a {
+    text-decoration: none;
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(51, 65, 85, 0.4);
+    background: rgba(15, 23, 42, 0.25);
+    transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-right a:hover {
+    color: var(--gold-bright);
+    border-color: rgba(250, 204, 21, 0.75);
+    transform: translateY(-1px);
+}
+
+.nav-right button {
+    margin-left: 0; /* override older rule */
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 2px solid rgba(139, 105, 20, 0.85);
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: #2b1d0a;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(212, 160, 23, 0.18);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.nav-right button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow: 0 10px 28px rgba(212, 160, 23, 0.28);
+}
+
+/* Navbar username */
+#nav-username {
+    font-weight: 900;
+    color: var(--gold-bright);
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+    margin-right: 4px;
+}
+
+#nav-username:empty {
+    display: none;
+}
+
+/* Auth pages */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 16px;
+}
+
+.auth-card {
+    width: min(420px, 92vw);
+    background: linear-gradient(145deg, rgba(44, 24, 16, 0.35), rgba(7, 18, 37, 0.92));
+    border: 3px solid var(--gold);
+    border-radius: 14px;
+    padding: 26px 22px;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.35),
+        0 18px 60px rgba(0, 0, 0, 0.45);
+    position: relative;
+}
+
+/* subtle "wanted poster" texture */
+.auth-card:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background:
+        repeating-linear-gradient(
+            45deg,
+            rgba(250, 204, 21, 0.08) 0px,
+            rgba(250, 204, 21, 0.08) 6px,
+            rgba(0, 0, 0, 0) 6px,
+            rgba(0, 0, 0, 0) 18px
+        );
+    pointer-events: none;
+    opacity: 0.55;
+}
+
+.auth-card > * {
+    position: relative;
+}
+
+.auth-card h2 {
+    margin: 0 0 14px;
+    text-align: center;
+    font-size: 1.6rem;
+    color: var(--gold-bright);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.auth-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.auth-card input {
+    flex: none;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(51, 65, 85, 0.8);
+    background: rgba(10, 21, 40, 0.85);
+    color: var(--ink);
+}
+
+.auth-card input::placeholder {
+    color: rgba(243, 232, 198, 0.55);
+}
+
+.auth-card button[type="submit"] {
+    width: 100%;
+    flex: none;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, var(--crimson), var(--crimson-dark));
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    color: var(--parchment, #f3e8c6);
+    border-radius: 10px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 10px 28px rgba(196, 30, 58, 0.22);
+}
+
+.auth-card button[type="submit"]:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+.auth-switch {
+    margin: 0;
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+}
+
+.auth-switch a {
+    color: var(--gold-bright);
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+/* Ensure CSS variables are defined */
+:root {
+    --sea-deep: #071225;
+    --sea-mid: #0c2140;
+    --ink: #f3e8c6;
+    --ink-dim: rgba(243, 232, 198, 0.75);
+    --gold: #facc15;
+    --gold-bright: #fde047;
+    --crimson: #c41e3a;
+    --crimson-dark: #8f182a;
+    --slate: #334155;
+    --rope: #8b6914;
+}
+
+body {
+    margin: 0;
+    padding: 0;
 }
