@@ -3,6 +3,7 @@ from database.connection import get_db_connection
 from services.reward_service import calculate_rewards
 from fastapi import Depends
 from services.auth_service import get_current_user
+from datetime import date, timedelta
 
 router = APIRouter()
 
@@ -150,7 +151,13 @@ def complete_task(task_id: int, user_id: int = Depends(get_current_user)):
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT reward, difficulty, complete FROM tasks WHERE task_id = ? AND user_id = ?",
+        """
+        SELECT t.reward, t.difficulty, t.complete,
+            u.streak_count, u.last_completed_date
+        FROM tasks t
+        JOIN users u ON u.user_id = t.user_id
+        WHERE t.task_id = ? AND t.user_id = ?
+        """,
         (task_id, user_id)
     )
     row = cursor.fetchone()
@@ -173,12 +180,29 @@ def complete_task(task_id: int, user_id: int = Depends(get_current_user)):
         WHERE task_id = ?
     """, (task_id,))
 
+    today = date.today()
+    today_str = today.isoformat()
+    yesterday_str = (today - timedelta(days=1)).isoformat()
+
+    current_streak = row["streak_count"] or 0
+    last_completed_date = row["last_completed_date"]
+
+    if last_completed_date == today_str:
+        new_streak = current_streak
+    elif last_completed_date == yesterday_str:
+        new_streak = current_streak + 1
+    else:
+        new_streak = 1
+
+
     cursor.execute("""
         UPDATE users
         SET bounty = bounty + ?,
-            total_bounty = total_bounty + ?
+            total_bounty = total_bounty + ?,
+            streak_count = ?,
+            last_completed_date = ?
         WHERE user_id = ?
-    """, (reward, reward, user_id))
+    """, (reward, reward, new_streak, today_str, user_id))
 
     conn.commit()
     conn.close()

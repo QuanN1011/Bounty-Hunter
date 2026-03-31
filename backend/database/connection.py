@@ -15,9 +15,20 @@ def init_db():
             username TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
             bounty INTEGER DEFAULT 0,
-            total_bounty INTEGER DEFAULT 0
+            total_bounty INTEGER DEFAULT 0,
+            streak_count INTEGER DEFAULT 0,
+            last_completed_date TEXT
         )
     """)
+
+    cursor.execute("PRAGMA table_info(users)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if "streak_count" not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN streak_count INTEGER DEFAULT 0")
+
+    if "last_completed_date" not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN last_completed_date TEXT")
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tasks (
