@@ -7,10 +7,12 @@ from datetime import date, timedelta
 
 router = APIRouter()
 
+ALLOWED_CATEGORIES = ["Personal", "Work", "Study", "Health", "Finance", "Errands", "Home", "Other"]
+
 
 @router.post("/tasks")
 def create_task(task: dict, user_id: int = Depends(get_current_user)):
-    required_fields = ["name", "description", "difficulty", "reward"]
+    required_fields = ["name", "description", "difficulty", "reward", "category"]
 
     for field in required_fields:
         if field not in task:
@@ -18,18 +20,22 @@ def create_task(task: dict, user_id: int = Depends(get_current_user)):
 
     if task["difficulty"] not in ["Easy", "Medium", "Hard"]:
         raise HTTPException(status_code=400, detail="Invalid difficulty")
+    
+    if task["category"] not in ALLOWED_CATEGORIES:
+        raise HTTPException(status_code=400, detail="Invalid category")
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO tasks (name, description, difficulty, reward, complete, user_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO tasks (name, description, difficulty, reward, category, complete, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         task["name"],
         task["description"],
         task["difficulty"],
         task["reward"],
+        task["category"],
         False,
         user_id
     ))
@@ -75,7 +81,7 @@ def get_task_by_id(task_id: int, user_id: int = Depends(get_current_user)):
 
 @router.put("/tasks/{task_id}")
 def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_current_user)):
-    required_fields = ["name", "description", "difficulty", "reward"]
+    required_fields = ["name", "description", "difficulty", "reward", "category"]
 
     for field in required_fields:
         if field not in updated_task:
@@ -83,6 +89,9 @@ def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_cur
 
     if updated_task["difficulty"] not in ["Easy", "Medium", "Hard"]:
         raise HTTPException(status_code=400, detail="Invalid difficulty")
+    
+    if updated_task["category"] not in ALLOWED_CATEGORIES:
+        raise HTTPException(status_code=400, detail="Invalid category")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -99,13 +108,14 @@ def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_cur
 
     cursor.execute("""
         UPDATE tasks
-        SET name = ?, description = ?, difficulty = ?, reward = ?
+        SET name = ?, description = ?, difficulty = ?, reward = ?, category = ?
         WHERE task_id = ? AND user_id = ?
     """, (
         updated_task["name"],
         updated_task["description"],
         updated_task["difficulty"],
         updated_task["reward"],
+        updated_task["category"],
         task_id,
         user_id
     ))
