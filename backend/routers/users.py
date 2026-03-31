@@ -5,6 +5,7 @@ from services.auth_service import hash_password, verify_password, create_access_
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Depends
 from services.auth_service import get_current_user
+from datetime import date, timedelta
 
 router = APIRouter()
 
@@ -17,13 +18,24 @@ def get_current_user_info(user_id: int = Depends(get_current_user)):
     cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
     user = cursor.fetchone()
 
-    conn.close()
-
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     level = get_level(user["total_bounty"])
     progress = get_progress(user["total_bounty"])
+    streak_count = user["streak_count"] or 0
+    last_completed_date = user["last_completed_date"]
+
+    if last_completed_date:
+        yesterday_str = (date.today() - timedelta(days=1)).isoformat()
+
+        # if last completed date is before yesterday, streak is reset
+        if last_completed_date < yesterday_str:
+            streak_count = 0
+            cursor.execute("UPDATE users SET streak_count = ? WHERE user_id = ?", (streak_count, user_id))
+            conn.commit()
+    
+    conn.close()
 
     return {
         "user_id": user["user_id"],
@@ -31,12 +43,14 @@ def get_current_user_info(user_id: int = Depends(get_current_user)):
         "bounty": user["bounty"],
         "total_bounty": user["total_bounty"],
         "level": level,
-        "progress": progress
+        "progress": progress,
+        "streak_count": streak_count,
+        "last_completed_date": last_completed_date
     }
 
 @router.post("/register")
 def register_user(user: dict):
-    username = user.get(("username") or "").strip()
+    username = (user.get("username") or "").strip()
     password = user.get("password")
 
     if not username or not password:

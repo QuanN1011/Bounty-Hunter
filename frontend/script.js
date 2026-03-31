@@ -17,6 +17,7 @@ const form = document.getElementById("create-task-form"); // Form for creating n
 const level = document.getElementById("level"); // get level
 const progress = document.getElementById("progress-fill"); // get porgress fill
 const progressText = document.getElementById("progress-text"); // get progress text
+const streak = document.getElementById('streak'); // get streak display
 
 /* ========= UI state ========= */
 let currentFilter = "all"; // Track current filter state
@@ -91,6 +92,9 @@ async function loadUser() {
     bountyForm.textContent = "Bounty: " + user.bounty;
     totalBounty.textContent = "Total Bounty: " + user.total_bounty;
     level.textContent = "Rank: " + user.level;
+    if(streak){
+        streak.textContent = "Streak: " + (user.streak_count ?? 0) + " 🔥";
+    }
 
     const navUsername = document.getElementById("nav-username");
     if (navUsername){
