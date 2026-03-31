@@ -137,6 +137,29 @@ form button:hover {
     transition: width 0.4s ease;
 }
 
+/* category filter buttons */
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 10px 0 14px;
+}
+
+.category-buttons button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #f1f5f9;
+  cursor: pointer;
+}
+
+.category-buttons button:hover {
+  border-color: #facc15;
+  color: #facc15;
+}
+
 /* =========================
    Pirate UI improvements, Navbar, and Auth Pages
    ========================= */
