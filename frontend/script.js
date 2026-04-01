@@ -91,14 +91,14 @@ async function loadUser() {
 
     if (!user) return;
 
-    bountyForm.textContent = "Bounty: " + user.bounty;
-    totalBounty.textContent = "Total Bounty: " + user.total_bounty;
-    level.textContent = "Rank: " + user.level;
-    if(streak){
-        streak.textContent = "Streak: " + (user.streak_count ?? 0) + " 🔥";
+    bountyForm.textContent = user.bounty;
+    totalBounty.textContent = user.total_bounty;
+    level.textContent = user.level;
+    if (streak) {
+        streak.textContent = (user.streak_count ?? 0) + " 🔥";
     }
-    if (tasksCompleted){
-        tasksCompleted.textContent = "Tasks Completed: " + (user.tasks_completed ?? 0);
+    if (tasksCompleted) {
+        tasksCompleted.textContent = String(user.tasks_completed ?? 0);
     }
 
     const navUsername = document.getElementById("nav-username");
@@ -106,8 +106,10 @@ async function loadUser() {
         navUsername.textContent = user.username;
     }
 
-    progress.style.width = user.progress + "%";
-    progressText.textContent = user.progress + "%";
+    const pct = user.progress ?? 0;
+    progress.style.width = pct + "%";
+    progressText.textContent = pct + "%";
+    progress.closest("[role='progressbar']")?.setAttribute("aria-valuenow", String(pct));
 }
 
 // get tasks and display them
