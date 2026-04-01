@@ -18,6 +18,7 @@ const level = document.getElementById("level"); // get level
 const progress = document.getElementById("progress-fill"); // get porgress fill
 const progressText = document.getElementById("progress-text"); // get progress text
 const streak = document.getElementById('streak'); // get streak display
+const tasksCompleted = document.getElementById('tasks-completed'); // get tasks completed display
 
 /* ========= UI state ========= */
 let currentFilter = "all"; // Track current filter state
@@ -95,6 +96,9 @@ async function loadUser() {
     level.textContent = "Rank: " + user.level;
     if(streak){
         streak.textContent = "Streak: " + (user.streak_count ?? 0) + " 🔥";
+    }
+    if (tasksCompleted){
+        tasksCompleted.textContent = "Tasks Completed: " + (user.tasks_completed ?? 0);
     }
 
     const navUsername = document.getElementById("nav-username");
