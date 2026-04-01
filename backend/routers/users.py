@@ -35,6 +35,17 @@ def get_current_user_info(user_id: int = Depends(get_current_user)):
             cursor.execute("UPDATE users SET streak_count = ? WHERE user_id = ?", (streak_count, user_id))
             conn.commit()
     
+    # to track total completed tasks, use count
+    cursor.execute(
+        """
+        SELECT COUNT(*) AS n
+        FROM tasks
+        WHERE user_id = ? AND complete = 1
+        """,
+        (user_id,),
+    )
+    tasks_completed = cursor.fetchone()["n"]
+    
     conn.close()
 
     return {
@@ -45,7 +56,8 @@ def get_current_user_info(user_id: int = Depends(get_current_user)):
         "level": level,
         "progress": progress,
         "streak_count": streak_count,
-        "last_completed_date": last_completed_date
+        "last_completed_date": last_completed_date,
+        "tasks_completed": tasks_completed
     }
 
 @router.post("/register")
