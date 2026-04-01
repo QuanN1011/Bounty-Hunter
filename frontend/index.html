@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bounty Hunter</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
-    <!-- NAVBAR -->
+
     <nav class="navbar">
 
         <div class="nav-left">
@@ -23,51 +24,77 @@
             <span id="nav-username"></span>
             <a href="login.html">Login</a>
             <a href="register.html">Register</a>
-            <button id="logout-btn" hidden>Logout</button>
+            <button type="button" id="logout-btn" hidden>Logout</button>
         </div>
     </nav>
 
+    <main class="dashboard">
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">🏴‍☠️ Bounty Hunter</h1>
+            <p class="dashboard-tagline">Post contracts, collect bounty, climb the ranks.</p>
+        </header>
 
-    <!-- Bounty Section-->
-    <div class="container">
-        <h1>🏴‍☠️ Bounty Hunter</h1>
-
-        <div class="bounty-box">
-            <h2>Your Bounty</h2>
-            <h2 id="bounty"></h2>
-            <h3 id= "total-bounty"></h3>
-            <h3 id= "level"></h3>
-            <h3 id = "streak"></h3>
-            <h3 id = "tasks-completed"> 0</h3>
-        </div>
-        <div class="progress-container">
-            <div class="progress-header">
-                <span>Progress to Next Rank</span>
-                <span id="progress-text">0%</span>
+        <section class="dashboard-panel dashboard-panel--stats" aria-labelledby="stats-heading">
+            <div class="panel-heading">
+                <h2 id="stats-heading" class="panel-title">Captains log</h2>
+                <p class="panel-subtitle">Your standing on the seas</p>
             </div>
 
-            <div class="progress-bar">
-                <div id="progress-fill"></div>
+            <div class="bounty-showcase">
+                <p class="bounty-showcase-label">Live bounty</p>
+                <p class="bounty-showcase-value" id="bounty">—</p>
             </div>
-        </div>
 
-        <!-- Tasks Section -->
-        <div class="tasks-box">
-            <h2>Create Task</h2>
+            <div class="stat-grid">
+                <div class="stat-tile">
+                    <span class="stat-tile-label">Total earned</span>
+                    <span class="stat-tile-value" id="total-bounty">—</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-tile-label">Rank</span>
+                    <span class="stat-tile-value stat-tile-value--accent" id="level">—</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-tile-label">Streak</span>
+                    <span class="stat-tile-value" id="streak">—</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-tile-label">Tasks done</span>
+                    <span class="stat-tile-value" id="tasks-completed">0</span>
+                </div>
+            </div>
 
-            <form id="create-task-form">
-                <input type="text" id="name" placeholder="Task Name" required />
+            <div class="progress-wrap">
+                <div class="progress-header">
+                    <span>Progress to next rank</span>
+                    <span id="progress-text" class="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div id="progress-fill"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-panel dashboard-panel--tasks" aria-labelledby="tasks-heading">
+            <div class="panel-heading">
+                <h2 id="tasks-heading" class="panel-title">Bounty board</h2>
+                <p class="panel-subtitle">Hunt down every contract</p>
+            </div>
+
+            <h3 class="subsection-title">Post a new contract</h3>
+            <form id="create-task-form" class="task-form">
+                <input type="text" id="name" placeholder="Task name" required />
                 <input type="text" id="description" placeholder="Description" required />
-                
-                <select id="difficulty">
+
+                <select id="difficulty" aria-label="Difficulty">
                     <option value="Easy">Easy</option>
                     <option value="Medium">Medium</option>
                     <option value="Hard">Hard</option>
                 </select>
 
-                <input type="number" id="reward" placeholder="Reward" required />
+                <input type="number" id="reward" placeholder="Reward (berry)" required />
 
-                <select id="category" required>
+                <select id="category" required aria-label="Category">
                     <option value="Work">Work</option>
                     <option value="Personal">Personal</option>
                     <option value="Study">Study</option>
@@ -78,43 +105,51 @@
                     <option value="Other" selected>Other</option>
                 </select>
 
-                <button type="submit">Add Task</button>
+                <button type="submit">Add to the board</button>
             </form>
 
-            <h2>Tasks</h2>
-            <!-- Filter buttons -->
-             <div class="filter-buttons">
-                <button type="button" data-filter="all">All</button>
-                <button type="button" data-filter="completed">Completed</button>
-                <button type="button" data-filter="incomplete">Incomplete</button>
+            <h3 class="subsection-title">Open contracts</h3>
+
+            <div class="task-controls">
+                <div class="control-row">
+                    <span class="control-label">Filter</span>
+                    <div class="filter-buttons btn-group">
+                        <button type="button" data-filter="all">All</button>
+                        <button type="button" data-filter="completed">Completed</button>
+                        <button type="button" data-filter="incomplete">Incomplete</button>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Sort</span>
+                    <div class="sort-buttons btn-group">
+                        <button type="button" data-sort="reward">By reward</button>
+                        <button type="button" data-sort="difficulty">By difficulty</button>
+                    </div>
+                </div>
+                <div class="control-row control-row--search">
+                    <label class="control-label" for="search">Search</label>
+                    <input type="search" id="search" class="task-search" placeholder="Filter by name or description…" autocomplete="off">
+                </div>
+                <div class="control-row control-row--categories">
+                    <span class="control-label">Category</span>
+                    <div class="category-filter">
+                        <button type="button" data-category="All">All</button>
+                        <button type="button" data-category="Personal">Personal</button>
+                        <button type="button" data-category="Work">Work</button>
+                        <button type="button" data-category="Study">Study</button>
+                        <button type="button" data-category="Health">Health</button>
+                        <button type="button" data-category="Finance">Finance</button>
+                        <button type="button" data-category="Errands">Errands</button>
+                        <button type="button" data-category="Home">Home</button>
+                        <button type="button" data-category="Other">Other</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Sort buttons -->
-             <div class="sort-buttons">
-                <button type="button" data-sort="reward">Sort by Reward</button>
-                <button type="button" data-sort="difficulty">Sort by Difficulty</button>
-             </div>
+            <ul id="task-list" class="task-list"></ul>
+        </section>
+    </main>
 
-            <!-- Search -->
-            <input type = "text" id = "search" placeholder = "Search tasks...">
-
-            <!-- Category Filter -->
-            <div class="category-filter">
-                <button type="button" data-category="All">All</button>
-                <button type="button" data-category="Personal">Personal</button>
-                <button type="button" data-category="Work">Work</button>
-                <button type="button" data-category="Study">Study</button>
-                <button type="button" data-category="Health">Health</button>
-                <button type="button" data-category="Finance">Finance</button>
-                <button type="button" data-category="Errands">Errands</button>
-                <button type="button" data-category="Home">Home</button>
-                <button type="button" data-category="Other">Other</button>
-            </div>
-
-            <ul id="task-list"></ul>
-        </div>
-    </div>
-
-    <script type = "module" src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
