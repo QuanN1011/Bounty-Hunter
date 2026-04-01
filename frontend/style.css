@@ -1,3 +1,80 @@
+.container {
+    width: 600px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 30px;
+}
+h2 {
+    margin-top: 0;
+}
+
+.bounty-box {
+    background-color: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+#bounty {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #facc15;
+}
+
+.tasks-box {
+    background-color: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.bounty-box,
+.tasks-box {
+    border: 1px solid #334155;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background-color: #334155;
+    margin: 12px 0;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+li button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #3b82f6;
+    color: white;
+    cursor: pointer;
+}
+
+li button:hover {
+    background-color: #2563eb;
+}
+
+li button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+/* Dashboard task form: use class `.task-form` on #create-task-form (see index.html). Never style bare `form` — breaks auth pages. */
+
 /* =========================
    Pirate UI improvements, Navbar, and Auth Pages
    ========================= */
@@ -12,6 +89,12 @@
     --crimson-dark: #8f182a;
     --slate: #334155;
     --rope: #8b6914;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body {
@@ -545,10 +628,14 @@ body {
     align-items: center;
     justify-content: center;
     padding: 28px 16px;
+    overflow-x: hidden;
 }
 
 .auth-card {
-    width: min(420px, 92vw);
+    width: min(420px, 100%);
+    max-width: 100%;
+    margin: 0 auto;
+    flex: 0 1 auto;
     background: linear-gradient(145deg, rgba(44, 24, 16, 0.35), rgba(7, 18, 37, 0.92));
     border: 3px solid var(--gold);
     border-radius: 14px;
@@ -592,13 +679,20 @@ body {
 .auth-card form {
     display: flex;
     flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
     gap: 12px;
     margin-bottom: 10px;
+    width: 100%;
+    min-width: 0;
 }
 
 .auth-card input {
+    display: block;
     flex: none;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid rgba(51, 65, 85, 0.8);
@@ -640,4 +734,20 @@ body {
     color: var(--gold-bright);
     text-decoration: underline;
     font-weight: 700;
+}
+
+.auth-flash {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    background: rgba(250, 204, 21, 0.1);
+    border: 1px solid rgba(250, 204, 21, 0.35);
+}
+
+.auth-flash[hidden] {
+    display: none !important;
 }

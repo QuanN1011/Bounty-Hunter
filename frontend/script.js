@@ -69,9 +69,8 @@ async function register() {
     alert("Registration failed: " + (result.data?.detail || "Unknown error"));
     return;
   }
-
-  alert("Registration successful. Please log in.");
-  window.location.href = "login.html";
+  
+  window.location.replace("login.html?registered = 1");
 }
 
 // function to log out
@@ -363,13 +362,13 @@ function applyCategoryFilter(tasks){
 
 /* ========= Dashboard: event wiring ========= */
 function bindModuleControls() {
-    document.getElementById("login-form")?.addEventListener("submit", (e) => {
+    document.getElementById("login-form")?.addEventListener("submit",async (e) => {
         e.preventDefault();
-        login();
+        await login();
     });
-    document.getElementById("register-form")?.addEventListener("submit", (e) => {
+    document.getElementById("register-form")?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        register();
+        await register();
     });
     document.getElementById("logout-btn")?.addEventListener("click", logout);
 
@@ -395,6 +394,17 @@ function updateAuthUI(){
     logoutButton.hidden = !localStorage.getItem("token");
 }
 
+// show flash user just registered, login
+function showRegisterSuccessFlash(){
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("registered") !== "1") return;
+    const el = document.getElementById("auth-flash");
+    if (!el) return;
+    el.textContent = "Account created. Sign in below.";
+    el.hidden = false;
+    history.replaceState({}, "", "login.html");
+}
+
 async function loadApp() {
     await loadUser();
     await loadTasks();
@@ -403,6 +413,7 @@ async function loadApp() {
 
 bindModuleControls();
 updateAuthUI();
+showRegisterSuccessFlash();
 
 // on register, when click enter on username, go to password input
 document.getElementById("register-username")?.addEventListener("keydown", function (e){
