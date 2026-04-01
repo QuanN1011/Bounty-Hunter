@@ -17,18 +17,26 @@ const form = document.getElementById("create-task-form"); // Form for creating n
 const level = document.getElementById("level"); // get level
 const progress = document.getElementById("progress-fill"); // get porgress fill
 const progressText = document.getElementById("progress-text"); // get progress text
+const streak = document.getElementById('streak'); // get streak display
+const tasksCompleted = document.getElementById('tasks-completed'); // get tasks completed display
 
 /* ========= UI state ========= */
 let currentFilter = "all"; // Track current filter state
 let currentSort = "none"; // Track current sort state
 let searchQuery = ""; // Track current search query (if implementing search)
+let currentCategory = "All"; // track current category filter
 
 /* ========= Auth actions ========= */
 // function to login 
 async function login() {
 
-    const username = document.getElementById("username").value;
+    const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
+
+    if (username.includes(" ")) {
+        alert("Username cannot contain spaces.");
+        return;
+    }
 
     const data = await loginUser(username, password);
 
@@ -47,8 +55,13 @@ async function login() {
 
 // function to register
 async function register() {
-  const username = document.getElementById("register-username").value;
+  const username = document.getElementById("register-username").value.trim();
   const password = document.getElementById("register-password").value;
+
+  if (username.includes(" ")){
+    alert("Username cannot contain spaces");
+    return;
+  }
 
   const result = await registerUser(username, password);
 
@@ -81,6 +94,12 @@ async function loadUser() {
     bountyForm.textContent = "Bounty: " + user.bounty;
     totalBounty.textContent = "Total Bounty: " + user.total_bounty;
     level.textContent = "Rank: " + user.level;
+    if(streak){
+        streak.textContent = "Streak: " + (user.streak_count ?? 0) + " 🔥";
+    }
+    if (tasksCompleted){
+        tasksCompleted.textContent = "Tasks Completed: " + (user.tasks_completed ?? 0);
+    }
 
     const navUsername = document.getElementById("nav-username");
     if (navUsername){
@@ -106,6 +125,7 @@ async function loadTasks(){
     filteredTasks = applyFilter(filteredTasks);
     filteredTasks = applySearch(filteredTasks);
     filteredTasks = applySort(filteredTasks);
+    filteredTasks = applyCategoryFilter(filteredTasks);
 
     for (const task of filteredTasks) {
         const taskItem = createTaskCard(task);
@@ -129,6 +149,7 @@ function createTaskCard(task){
         <p>${task.description}</p>
         <p><strong>Difficulty:</strong> ${task.difficulty}</p>
         <p><strong>Reward:</strong> ${task.reward}</p>
+        <p><strong>Category:</strong> ${task.category}</p>
         <p>${task.complete ? "✅ Completed" : "❌ Not Completed"}</p>
     </div>
     `;
@@ -197,6 +218,17 @@ function updateTask(task, taskItem){
     <input id = "edit-difficulty-${task.task_id}" type="text" value="${task.difficulty}">
     <input id = "edit-reward-${task.task_id}" type="number" value="${task.reward}">
 
+    <select id="edit-category-${task.task_id}">
+        <option value="Work" ${task.category === "Work" ? "selected" : ""}>Work</option>
+        <option value="Personal" ${task.category === "Personal" ? "selected" : ""}>Personal</option>
+        <option value="Study" ${task.category === "Study" ? "selected" : ""}>Study</option>
+        <option value="Health" ${task.category === "Health" ? "selected" : ""}>Health</option>
+        <option value="Finance" ${task.category === "Finance" ? "selected" : ""}>Finance</option>
+        <option value="Errands" ${task.category === "Errands" ? "selected" : ""}>Errands</option>
+        <option value="Home" ${task.category === "Home" ? "selected" : ""}>Home</option>
+        <option value="Other" ${task.category === "Other" ? "selected" : ""}>Other</option>
+    </select>
+
     <button id="save-button-${task.task_id}">Save</button>
     `;
 
@@ -205,6 +237,7 @@ function updateTask(task, taskItem){
         const newDescription = document.getElementById(`edit-description-${task.task_id}`).value;
         const newDifficulty = document.getElementById(`edit-difficulty-${task.task_id}`).value;
         const newReward = parseInt(document.getElementById(`edit-reward-${task.task_id}`).value);
+        const newCategory = document.getElementById(`edit-category-${task.task_id}`).value;
 
         if (!newName || !newDescription || !newDifficulty || isNaN(newReward) || newReward <= 0) {
             alert("Please fill in all fields with valid values.");
@@ -215,7 +248,8 @@ function updateTask(task, taskItem){
             name: newName,
             description: newDescription,
             difficulty: newDifficulty,
-            reward: newReward
+            reward: newReward,
+            category: newCategory
         };
 
         const data = await updateTaskAPI(task.task_id, updatedTask);
@@ -238,12 +272,14 @@ async function handleCreateTask(event){
     const description = document.getElementById("description").value;
     const difficulty = document.getElementById("difficulty").value;
     const reward = parseInt(document.getElementById("reward").value);
+    const category = document.getElementById("category").value;
 
     const newTask = {
         name,
         description,
         difficulty,
         reward,
+        category,
         complete: false
     };
 
@@ -310,6 +346,19 @@ function setSearch() {
     });
 }
 
+// function to filter category
+function setCategory(category){
+    currentCategory = category;
+    loadTasks();
+}
+
+function applyCategoryFilter(tasks){
+    if (currentCategory === "All"){
+        return tasks;
+    }
+    return tasks.filter(task => task.category === currentCategory);
+}
+
 /* ========= Dashboard: event wiring ========= */
 function bindModuleControls() {
     document.getElementById("login-form")?.addEventListener("submit", (e) => {
@@ -330,6 +379,11 @@ function bindModuleControls() {
         const btn = e.target.closest("button[data-sort]");
         if (btn) setSort(btn.dataset.sort);
     });
+
+    document.querySelector(".category-filter")?.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-category]");
+        if (btn) setCategory(btn.dataset.category);
+    })
 }
 
 /* ========= Startup ========= */

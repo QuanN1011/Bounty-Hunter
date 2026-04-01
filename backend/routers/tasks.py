@@ -3,13 +3,16 @@ from database.connection import get_db_connection
 from services.reward_service import calculate_rewards
 from fastapi import Depends
 from services.auth_service import get_current_user
+from datetime import date, timedelta
 
 router = APIRouter()
+
+ALLOWED_CATEGORIES = ["Personal", "Work", "Study", "Health", "Finance", "Errands", "Home", "Other"]
 
 
 @router.post("/tasks")
 def create_task(task: dict, user_id: int = Depends(get_current_user)):
-    required_fields = ["name", "description", "difficulty", "reward"]
+    required_fields = ["name", "description", "difficulty", "reward", "category"]
 
     for field in required_fields:
         if field not in task:
@@ -17,18 +20,22 @@ def create_task(task: dict, user_id: int = Depends(get_current_user)):
 
     if task["difficulty"] not in ["Easy", "Medium", "Hard"]:
         raise HTTPException(status_code=400, detail="Invalid difficulty")
+    
+    if task["category"] not in ALLOWED_CATEGORIES:
+        raise HTTPException(status_code=400, detail="Invalid category")
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO tasks (name, description, difficulty, reward, complete, user_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO tasks (name, description, difficulty, reward, category, complete, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         task["name"],
         task["description"],
         task["difficulty"],
         task["reward"],
+        task["category"],
         False,
         user_id
     ))
@@ -74,7 +81,7 @@ def get_task_by_id(task_id: int, user_id: int = Depends(get_current_user)):
 
 @router.put("/tasks/{task_id}")
 def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_current_user)):
-    required_fields = ["name", "description", "difficulty", "reward"]
+    required_fields = ["name", "description", "difficulty", "reward", "category"]
 
     for field in required_fields:
         if field not in updated_task:
@@ -82,6 +89,9 @@ def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_cur
 
     if updated_task["difficulty"] not in ["Easy", "Medium", "Hard"]:
         raise HTTPException(status_code=400, detail="Invalid difficulty")
+    
+    if updated_task["category"] not in ALLOWED_CATEGORIES:
+        raise HTTPException(status_code=400, detail="Invalid category")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -98,13 +108,14 @@ def update_task(task_id: int, updated_task: dict, user_id: int = Depends(get_cur
 
     cursor.execute("""
         UPDATE tasks
-        SET name = ?, description = ?, difficulty = ?, reward = ?
+        SET name = ?, description = ?, difficulty = ?, reward = ?, category = ?
         WHERE task_id = ? AND user_id = ?
     """, (
         updated_task["name"],
         updated_task["description"],
         updated_task["difficulty"],
         updated_task["reward"],
+        updated_task["category"],
         task_id,
         user_id
     ))
@@ -150,7 +161,13 @@ def complete_task(task_id: int, user_id: int = Depends(get_current_user)):
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT reward, difficulty, complete FROM tasks WHERE task_id = ? AND user_id = ?",
+        """
+        SELECT t.reward, t.difficulty, t.complete,
+            u.streak_count, u.last_completed_date
+        FROM tasks t
+        JOIN users u ON u.user_id = t.user_id
+        WHERE t.task_id = ? AND t.user_id = ?
+        """,
         (task_id, user_id)
     )
     row = cursor.fetchone()
@@ -173,12 +190,29 @@ def complete_task(task_id: int, user_id: int = Depends(get_current_user)):
         WHERE task_id = ?
     """, (task_id,))
 
+    today = date.today()
+    today_str = today.isoformat()
+    yesterday_str = (today - timedelta(days=1)).isoformat()
+
+    current_streak = row["streak_count"] or 0
+    last_completed_date = row["last_completed_date"]
+
+    if last_completed_date == today_str:
+        new_streak = current_streak
+    elif last_completed_date == yesterday_str:
+        new_streak = current_streak + 1
+    else:
+        new_streak = 1
+
+
     cursor.execute("""
         UPDATE users
         SET bounty = bounty + ?,
-            total_bounty = total_bounty + ?
+            total_bounty = total_bounty + ?,
+            streak_count = ?,
+            last_completed_date = ?
         WHERE user_id = ?
-    """, (reward, reward, user_id))
+    """, (reward, reward, new_streak, today_str, user_id))
 
     conn.commit()
     conn.close()

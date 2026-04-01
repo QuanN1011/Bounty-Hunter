@@ -37,6 +37,8 @@
             <h2 id="bounty"></h2>
             <h3 id= "total-bounty"></h3>
             <h3 id= "level"></h3>
+            <h3 id = "streak"></h3>
+            <h3 id = "tasks-completed"> 0</h3>
         </div>
         <div class="progress-container">
             <div class="progress-header">
@@ -65,6 +67,17 @@
 
                 <input type="number" id="reward" placeholder="Reward" required />
 
+                <select id="category" required>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Study">Study</option>
+                    <option value="Health">Health</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Errands">Errands</option>
+                    <option value="Home">Home</option>
+                    <option value="Other" selected>Other</option>
+                </select>
+
                 <button type="submit">Add Task</button>
             </form>
 
@@ -84,6 +97,19 @@
 
             <!-- Search -->
             <input type = "text" id = "search" placeholder = "Search tasks...">
+
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <button type="button" data-category="All">All</button>
+                <button type="button" data-category="Personal">Personal</button>
+                <button type="button" data-category="Work">Work</button>
+                <button type="button" data-category="Study">Study</button>
+                <button type="button" data-category="Health">Health</button>
+                <button type="button" data-category="Finance">Finance</button>
+                <button type="button" data-category="Errands">Errands</button>
+                <button type="button" data-category="Home">Home</button>
+                <button type="button" data-category="Other">Other</button>
+            </div>
 
             <ul id="task-list"></ul>
         </div>
