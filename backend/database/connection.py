@@ -1,7 +1,11 @@
 import sqlite3
+from pathlib import Path
+
+_BACKEND_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = _BACKEND_DIR / "bounty_hunter.db"
 
 def get_db_connection():
-    conn = sqlite3.connect("bounty_hunter.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
