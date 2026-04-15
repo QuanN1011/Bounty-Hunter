@@ -1,0 +1,12 @@
+{
+    "name": "bounty-hunter-dev",
+    "private": true,
+    "scripts": {
+      "dev:frontend": "npm --prefix react-ui run dev",
+      "dev:backend": "cd backend && uvicorn main:app --reload",
+      "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix \"[{name}]\" --prefix-colors \"blue,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\""
+    },
+    "devDependencies": {
+      "concurrently": "^9.0.0"
+    }
+  }
