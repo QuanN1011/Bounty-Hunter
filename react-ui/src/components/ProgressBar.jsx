@@ -1,15 +1,11 @@
 function ProgressBar({ progressPercent }) {
   return (
-    <section>
-      <p>Progress to next rank: {progressPercent}%</p>
-      <div style={{ background: "#ddd", height: "12px", borderRadius: "6px" }}>
+    <section className="panel panel--progress">
+      <p className="progress-label">Progress to next rank: {progressPercent}%</p>
+      <div className="progress-track">
         <div
-          style={{
-            width: `${progressPercent}%`,
-            background: "#4caf50",
-            height: "100%",
-            borderRadius: "6px",
-          }}
+          className="progress-fill"
+          style={{ width: `${progressPercent}%` }}
         />
       </div>
     </section>
